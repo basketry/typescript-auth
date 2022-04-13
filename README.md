@@ -1,6 +1,6 @@
 [![main](https://github.com/basketry/typescript-auth/workflows/build/badge.svg?branch=main&event=push)](https://github.com/basketry/typescript-auth/actions?query=workflow%3Abuild+branch%3Amain+event%3Apush)
 
-# Typscript Auth
+# Typescript Auth
 
 Basketry generator for generating method-level authorization for Typescript applications
 
