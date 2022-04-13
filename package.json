@@ -1,6 +1,6 @@
 {
   "name": "@basketry/typescript-auth",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Basketry generator for generating method-level authorization for Typescript applications",
   "main": "./lib/index.js",
   "scripts": {
