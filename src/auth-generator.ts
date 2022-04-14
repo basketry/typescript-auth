@@ -4,6 +4,7 @@ import type {
   Generator,
   Method,
   OAuth2Scheme,
+  OAuth2Scope,
   Parameter,
   Property,
   ValidationRule,
@@ -44,7 +45,7 @@ export const generateAuth: Generator = (service) => {
 };
 
 function* buildStandardTypes(): Iterable<string> {
-  yield 'export interface AuthService { isAuthenticated(scheme: string): boolean; hasScope(scope: string): boolean; }';
+  yield 'export interface AuthService { isAuthenticated(scheme: string): boolean; hasScope(scheme: string, scope: string): boolean; }';
   yield `export type AuthResponse = 'authorized' | 'unauthenticated' | 'unauthorized';`;
 }
 
@@ -68,12 +69,25 @@ function* buildMethodAuthorizer(method: Method): Iterable<string> {
       )}) { return 'unauthenticated'; }`;
 
       const scopeConditions = requirements
-        .filter((r): r is OAuth2Scheme => r.type === 'oauth2')
-        .map((r) => r.flows)
-        .reduce((a, b) => a.concat(b), [])
-        .map((f) => f.scopes)
-        .reduce((a, b) => a.concat(b), [])
-        .map((scope) => `!${context}.hasScope('${scope.name}')`);
+        .filter((scheme): scheme is OAuth2Scheme => scheme.type === 'oauth2')
+        .map<[OAuth2Scheme, OAuth2Scope[]]>((scheme) => [
+          scheme,
+          scheme.flows.map((f) => f.scopes).reduce((a, b) => a.concat(b), []),
+        ])
+        .reduce<[OAuth2Scheme, OAuth2Scope][]>(
+          (acc, [scheme, scopes]) =>
+            acc.concat(
+              scopes.map<[OAuth2Scheme, OAuth2Scope]>((scope) => [
+                scheme,
+                scope,
+              ]),
+            ),
+          [],
+        )
+        .map(
+          ([scheme, scope]) =>
+            `!${context}.hasScope('${scheme.name}', '${scope.name}')`,
+        );
 
       if (scopeConditions.length) {
         yield `  if(${scopeConditions.join(' || ')}) { return 'unauthorized' }`;

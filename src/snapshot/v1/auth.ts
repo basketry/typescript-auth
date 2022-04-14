@@ -8,7 +8,7 @@
 
 export interface AuthService {
   isAuthenticated(scheme: string): boolean;
-  hasScope(scope: string): boolean;
+  hasScope(scheme: string, scope: string): boolean;
 }
 export type AuthResponse = 'authorized' | 'unauthenticated' | 'unauthorized';
 
@@ -16,7 +16,7 @@ export function authorizeGetGizmos(context: AuthService): AuthResponse {
   if (!context.isAuthenticated('oauth2Auth')) {
     return 'unauthenticated';
   }
-  if (!context.hasScope('read:gizmos')) {
+  if (!context.hasScope('oauth2Auth', 'read:gizmos')) {
     return 'unauthorized';
   }
   return 'authorized';
@@ -26,7 +26,7 @@ export function authorizeCreateGizmo(context: AuthService): AuthResponse {
   if (!context.isAuthenticated('oauth2Auth')) {
     return 'unauthenticated';
   }
-  if (!context.hasScope('write:gizmos')) {
+  if (!context.hasScope('oauth2Auth', 'write:gizmos')) {
     return 'unauthorized';
   }
   return 'authorized';
@@ -36,7 +36,10 @@ export function authorizeUpdateGizmo(context: AuthService): AuthResponse {
   if (!context.isAuthenticated('oauth2Auth')) {
     return 'unauthenticated';
   }
-  if (!context.hasScope('write:gizmos') || !context.hasScope('admin:gizmos')) {
+  if (
+    !context.hasScope('oauth2Auth', 'write:gizmos') ||
+    !context.hasScope('oauth2Auth', 'admin:gizmos')
+  ) {
     return 'unauthorized';
   }
   return 'authorized';
