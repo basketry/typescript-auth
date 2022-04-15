@@ -54,11 +54,12 @@ function* buildMethodAuthorizer(method: Method): Iterable<string> {
 
   yield `export function ${camel(
     `authorize_${method.name}`,
-  )}(${context}: AuthService): AuthResponse {`;
+  )}(${context}?: AuthService): AuthResponse {`;
 
   if (!method.security.length) {
     yield `  return 'authorized';`;
   } else {
+    yield `  if(!${context}) return 'unauthenticated';`;
     for (const requirements of method.security) {
       const authConditions = requirements.map(
         (requirement) => `!${context}.isAuthenticated('${requirement.name}')`,

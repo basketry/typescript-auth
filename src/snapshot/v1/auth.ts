@@ -12,7 +12,8 @@ export interface AuthService {
 }
 export type AuthResponse = 'authorized' | 'unauthenticated' | 'unauthorized';
 
-export function authorizeGetGizmos(context: AuthService): AuthResponse {
+export function authorizeGetGizmos(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('oauth2Auth')) {
     return 'unauthenticated';
   }
@@ -22,7 +23,8 @@ export function authorizeGetGizmos(context: AuthService): AuthResponse {
   return 'authorized';
 }
 
-export function authorizeCreateGizmo(context: AuthService): AuthResponse {
+export function authorizeCreateGizmo(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('oauth2Auth')) {
     return 'unauthenticated';
   }
@@ -32,7 +34,8 @@ export function authorizeCreateGizmo(context: AuthService): AuthResponse {
   return 'authorized';
 }
 
-export function authorizeUpdateGizmo(context: AuthService): AuthResponse {
+export function authorizeUpdateGizmo(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('oauth2Auth')) {
     return 'unauthenticated';
   }
@@ -45,41 +48,48 @@ export function authorizeUpdateGizmo(context: AuthService): AuthResponse {
   return 'authorized';
 }
 
-export function authorizeGetWidgets(context: AuthService): AuthResponse {
+export function authorizeGetWidgets(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('apiKeyAuth')) {
     return 'unauthenticated';
   }
   return 'authorized';
 }
 
-export function authorizeCreateWidget(context: AuthService): AuthResponse {
+export function authorizeCreateWidget(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('apiKeyAuth')) {
     return 'unauthenticated';
   }
   return 'authorized';
 }
 
-export function authorizePutWidget(context: AuthService): AuthResponse {
+export function authorizePutWidget(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('apiKeyAuth')) {
     return 'unauthenticated';
   }
   return 'authorized';
 }
 
-export function authorizeGetWidgetFoo(context: AuthService): AuthResponse {
+export function authorizeGetWidgetFoo(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('apiKeyAuth')) {
     return 'unauthenticated';
   }
   return 'authorized';
 }
 
-export function authorizeDeleteWidgetFoo(context: AuthService): AuthResponse {
+export function authorizeDeleteWidgetFoo(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
   if (!context.isAuthenticated('apiKeyAuth')) {
     return 'unauthenticated';
   }
   return 'authorized';
 }
 
-export function authorizeExhaustiveParams(_context: AuthService): AuthResponse {
+export function authorizeExhaustiveParams(
+  _context?: AuthService,
+): AuthResponse {
   return 'authorized';
 }
