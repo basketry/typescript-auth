@@ -93,3 +93,49 @@ export function authorizeExhaustiveParams(
 ): AuthResponse {
   return 'authorized';
 }
+
+export function authorizeAllAuthSchemes(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
+  if (!context.isAuthenticated('basicAuth')) {
+    return 'unauthenticated';
+  }
+  if (!context.isAuthenticated('alternate-basic-auth')) {
+    return 'unauthenticated';
+  }
+  if (!context.isAuthenticated('apiKeyAuth')) {
+    return 'unauthenticated';
+  }
+  if (!context.isAuthenticated('oauth2Auth')) {
+    return 'unauthenticated';
+  }
+  if (!context.hasScope('oauth2Auth', 'admin:gizmos')) {
+    return 'unauthorized';
+  }
+  return 'authorized';
+}
+
+export function authorizeComboAuthSchemes(context?: AuthService): AuthResponse {
+  if (!context) return 'unauthenticated';
+  if (
+    !context.isAuthenticated('basicAuth') ||
+    !context.isAuthenticated('apiKeyAuth')
+  ) {
+    return 'unauthenticated';
+  }
+  if (
+    !context.isAuthenticated('basicAuth') ||
+    !context.isAuthenticated('alternateApiKeyAuth')
+  ) {
+    return 'unauthenticated';
+  }
+  if (
+    !context.isAuthenticated('alternate-basic-auth') ||
+    !context.isAuthenticated('oauth2Auth')
+  ) {
+    return 'unauthenticated';
+  }
+  if (!context.hasScope('oauth2Auth', 'admin:gizmos')) {
+    return 'unauthorized';
+  }
+  return 'authorized';
+}
