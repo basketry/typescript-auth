@@ -60,41 +60,53 @@ function* buildMethodAuthorizer(method: Method): Iterable<string> {
     yield `  return 'authorized';`;
   } else {
     yield `  if(!${context}) return 'unauthenticated';`;
-    for (const requirements of method.security) {
-      const authConditions = requirements.map(
-        (requirement) => `!${context}.isAuthenticated('${requirement.name}')`,
-      );
 
-      yield `  if(${authConditions.join(
-        ' || ',
-      )}) { return 'unauthenticated'; }`;
+    const hasScopes = method.security
+      .flatMap((x) => x)
+      .some((x) => x.type === 'oauth2');
 
-      const scopeConditions = requirements
-        .filter((scheme): scheme is OAuth2Scheme => scheme.type === 'oauth2')
-        .map<[OAuth2Scheme, OAuth2Scope[]]>((scheme) => [
-          scheme,
-          scheme.flows.map((f) => f.scopes).reduce((a, b) => a.concat(b), []),
-        ])
-        .reduce<[OAuth2Scheme, OAuth2Scope][]>(
-          (acc, [scheme, scopes]) =>
-            acc.concat(
-              scopes.map<[OAuth2Scheme, OAuth2Scope]>((scope) => [
-                scheme,
-                scope,
-              ]),
-            ),
-          [],
-        )
-        .map(
-          ([scheme, scope]) =>
-            `!${context}.hasScope('${scheme.name}', '${scope.name}')`,
-        );
+    if (hasScopes) {
+      yield `let authenticated = false;`;
+    }
 
-      if (scopeConditions.length) {
-        yield `  if(${scopeConditions.join(' || ')}) { return 'unauthorized' }`;
+    for (const securityOption of method.security) {
+      const authZConditions: string[] = [];
+      const authNConditions: string[] = [];
+
+      securityOption.forEach((scheme) => {
+        const authNCondition = `${context}.isAuthenticated('${scheme.name}')`;
+        authNConditions.push(authNCondition);
+
+        if (scheme.type === 'oauth2') {
+          for (const scope of scheme.flows.flatMap((flow) => flow.scopes)) {
+            authZConditions.push(
+              `${context}.hasScope('${scheme.name}', '${scope.name}')`,
+            );
+          }
+        }
+      });
+
+      if (authNConditions.length) {
+        yield `  if(${authNConditions.join(' && ')}) {`;
+
+        if (authZConditions.length) {
+          yield `  authenticated = true;`;
+
+          yield `  if(${authZConditions.join(' && ')}) {`;
+          yield `  return 'authorized';`;
+          yield ` }`;
+        } else {
+          yield `  return 'authorized';`;
+        }
+
+        yield ` }`;
       }
     }
-    yield `  return 'authorized';`;
+    if (hasScopes) {
+      yield `  return authenticated ? 'unauthorized' : 'unauthenticated';`;
+    } else {
+      yield `  return 'unauthenticated';`;
+    }
   }
 
   yield `}`;
