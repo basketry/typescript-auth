@@ -1,20 +1,8 @@
-import { camel } from 'case';
+import type { Generator, Method } from 'basketry';
 import { format } from 'prettier';
-import type {
-  Generator,
-  Method,
-  OAuth2Scheme,
-  OAuth2Scope,
-  Parameter,
-  Property,
-  ValidationRule,
-} from 'basketry';
-import { warning } from './warning';
 
-export type GuardClauseFactory = (
-  param: Parameter | Property,
-  rule: ValidationRule,
-) => string | undefined;
+import { buildMethodAuthorizerName } from './name-factory';
+import { warning } from './warning';
 
 export const generateAuth: Generator = (service) => {
   const methods: Method[] = service.interfaces
@@ -52,8 +40,8 @@ function* buildStandardTypes(): Iterable<string> {
 function* buildMethodAuthorizer(method: Method): Iterable<string> {
   const context = method.security.length ? 'context' : '_context';
 
-  yield `export function ${camel(
-    `authorize_${method.name}`,
+  yield `export function ${buildMethodAuthorizerName(
+    method,
   )}(${context}?: AuthService): AuthResponse {`;
 
   if (!method.security.length) {
