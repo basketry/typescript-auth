@@ -1,4 +1,4 @@
-import type { Generator, Method } from 'basketry';
+import { Generator, isOAuth2Scheme, Method } from 'basketry';
 import { format } from 'prettier';
 
 import { buildMethodAuthorizerName } from './name-factory';
@@ -26,7 +26,7 @@ export const generateAuth: Generator = (service) => {
 
   return [
     {
-      path: [`v${service.majorVersion}`, 'auth.ts'],
+      path: [`v${service.majorVersion.value}`, 'auth.ts'],
       contents: formatted,
     },
   ];
@@ -49,9 +49,7 @@ function* buildMethodAuthorizer(method: Method): Iterable<string> {
   } else {
     yield `  if(!${context}) return 'unauthenticated';`;
 
-    const hasScopes = method.security
-      .flatMap((x) => x)
-      .some((x) => x.type === 'oauth2');
+    const hasScopes = method.security.flatMap((x) => x).some(isOAuth2Scheme);
 
     if (hasScopes) {
       yield `let authenticated = false;`;
@@ -62,13 +60,13 @@ function* buildMethodAuthorizer(method: Method): Iterable<string> {
       const authNConditions: string[] = [];
 
       securityOption.forEach((scheme) => {
-        const authNCondition = `${context}.isAuthenticated('${scheme.name}')`;
+        const authNCondition = `${context}.isAuthenticated('${scheme.name.value}')`;
         authNConditions.push(authNCondition);
 
-        if (scheme.type === 'oauth2') {
+        if (isOAuth2Scheme(scheme)) {
           for (const scope of scheme.flows.flatMap((flow) => flow.scopes)) {
             authZConditions.push(
-              `${context}.hasScope('${scheme.name}', '${scope.name}')`,
+              `${context}.hasScope('${scheme.name.value}', '${scope.name.value}')`,
             );
           }
         }

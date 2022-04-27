@@ -9,5 +9,5 @@ export function buildMethodAuthorizerName(
   method: Method,
   authModule?: string,
 ): string {
-  return prefix(authModule, camel(`authorize_${method.name}`));
+  return prefix(authModule, camel(`authorize_${method.name.value}`));
 }
