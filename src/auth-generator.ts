@@ -1,10 +1,25 @@
-import { Generator, isOAuth2Scheme, Method } from 'basketry';
+import {
+  Generator,
+  isOAuth2Scheme,
+  Method,
+  NamespacedBasketryOptions,
+  Service,
+  warning as standardWarning,
+} from 'basketry';
 import { format } from 'prettier';
 
 import { buildMethodAuthorizerName } from './name-factory';
-import { warning } from './warning';
 
-export const generateAuth: Generator = (service) => {
+function* warning(
+  service: Service,
+  options: NamespacedBasketryOptions,
+): Iterable<string> {
+  yield '/*';
+  yield* standardWarning(service, require('../package.json'), options || {});
+  yield '*/';
+}
+
+export const generateAuth: Generator = (service, options) => {
   const methods: Method[] = service.interfaces
     .map((int) => int.methods)
     .reduce((a, b) => a.concat(b), []);
@@ -15,7 +30,11 @@ export const generateAuth: Generator = (service) => {
     .map((method) => Array.from(buildMethodAuthorizer(method)).join('\n'))
     .join('\n\n');
 
-  const contents = [warning, standardTypes, authorizers].join('\n\n');
+  const contents = [
+    Array.from(warning(service, options)).join('\n'),
+    standardTypes,
+    authorizers,
+  ].join('\n\n');
   const formatted = format(contents, {
     singleQuote: true,
     useTabs: false,
