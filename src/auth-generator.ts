@@ -9,6 +9,7 @@ import {
 import { format } from 'prettier';
 
 import { buildMethodAuthorizerName } from './name-factory';
+import { buildFilePath } from '@basketry/typescript';
 
 function* warning(
   service: Service,
@@ -45,7 +46,7 @@ export const generateAuth: Generator = (service, options) => {
 
   return [
     {
-      path: [`v${service.majorVersion.value}`, 'auth.ts'],
+      path: buildFilePath(['auth.ts'], service, options),
       contents: formatted,
     },
   ];
