@@ -117,6 +117,10 @@ export function authorizeUpdateGizmo(context?: AuthService): AuthResponse {
   return authenticated ? 'unauthorized' : 'unauthenticated';
 }
 
+export function authorizeUploadGizmo(_context?: AuthService): AuthResponse {
+  return 'authorized';
+}
+
 export function authorizeCreateWidget(context?: AuthService): AuthResponse {
   if (!context) return 'unauthenticated';
   if (context.isAuthenticated('apiKeyAuth')) {
